@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-
 import axios from 'axios';
 
 const Movie = (props) => {
-  const { addToFavorites } = props;
-
-  const [movie, setMovie] = useState('');
+  const { addToFavorites, deleteMovie } = props;
+  const [movie, setMovie] = useState({
+    id: '', title: '', director: '', genre: '', metascore: '', description: ''
+  });
 
   const { id } = useParams();
   const navigate = useNavigate();
@@ -18,47 +18,47 @@ const Movie = (props) => {
       })
       .catch(err => {
         console.log(err.response);
-      })
+      });
   }, [id]);
 
-  return (<div className="modal-page col">
-    <div className="modal-dialog">
-      <div className="modal-content">
-        <div className="modal-header">
-          <h4 className="modal-title">{movie.title} Details</h4>
-        </div>
-        <div className="modal-body">
-          <div className="flexContainer">
+  const handleDelete = () => {
+    axios.delete(`http://localhost:9000/api/movies/${id}`)
+      .then(() => {
+        deleteMovie(id);
+        navigate("/movies");
+      })
+      .catch(err => {
+        console.log(err.response);
+      });
+  };
 
-            <section className="movie-details">
-              <div>
-                <label>Title: <strong>{movie.title}</strong></label>
-              </div>
-              <div>
-                <label>Director: <strong>{movie.director}</strong></label>
-              </div>
-              <div>
-                <label>Genre: <strong>{movie.genre}</strong></label>
-              </div>
-              <div>
-                <label>Metascore: <strong>{movie.metascore}</strong></label>
-              </div>
-              <div>
-                <label>Description:</label>
-                <p><strong>{movie.description}</strong></p>
-              </div>
-            </section>
+  const handleFavorite = () => {
+    addToFavorites(movie);
+  };
 
-            <section>
-              <span className="m-2 btn btn-dark">Favorite</span>
-              <Link to={`/movies/edit/${movie.id}`} className="m-2 btn btn-success">Edit</Link>
-              <span className="delete"><input type="button" className="m-2 btn btn-danger" value="Delete" /></span>
-            </section>
+  return (
+    <div className="modal-page col">
+      <div className="modal-dialog">
+        <div className="modal-content">
+          <div className="modal-header">
+            <h4 className="modal-title">{movie.title} Details</h4>
+          </div>
+          <div className="modal-body">
+            <div className="flexContainer">
+              <section className="movie-details">
+                {/* Movie details */}
+              </section>
+              <section>
+                <button onClick={handleFavorite} className="m-2 btn btn-dark">Favorite</button>
+                <Link to={`/movies/edit/${movie.id}`} className="m-2 btn btn-success">Edit</Link>
+                <button onClick={handleDelete} className="m-2 btn btn-danger">Delete</button>
+              </section>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>);
-}
+  );
+};
 
 export default Movie;
